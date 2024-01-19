@@ -1,18 +1,5 @@
 #pragma once
 
-// Namespace level information
-namespace Fusion
-{
-	float DeltaTime = 0;
-
-	enum ShaderType
-	{
-		Vertex,
-		Fragment
-	};
-
-}
-
 // Misc headers
 #include <iostream>
 #include <vector>
@@ -26,10 +13,21 @@ namespace Fusion
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-// Model importing headers
-//#include <assimp/Importer.hpp>
-//#include <assimp/scene.h>
-//#include <assimp/postprocess.h>
+// Namespace level information
+namespace Fusion
+{
+	float DeltaTime = 0;
+
+	glm::vec3 LightPosition(0.0f, 1.5f, -3.0f);
+	glm::vec3 LightColor(1.0f, 1.0f, 1.0f);
+
+	enum ShaderType
+	{
+		Vertex,
+		Fragment
+	};
+
+}
 
 // Engine headers, the order of these is important.
 #include "FusionConfig.h"

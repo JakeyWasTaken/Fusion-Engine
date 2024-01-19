@@ -10,8 +10,6 @@ namespace Fusion
 	{
 		std::string fp = FileLoader::GetFullFilePath(path);
 
-		printf("%s", fp);
-
 		unsigned int textureID;
 		glGenTextures(1, &textureID);
 
