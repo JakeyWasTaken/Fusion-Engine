@@ -57,7 +57,7 @@ namespace Fusion
 			glEnable(GL_DEPTH_TEST);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 #endif
-#if DRAW_WIRE_FRAME
+#if FS_DRAW_WIRE_FRAME
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 #endif
 

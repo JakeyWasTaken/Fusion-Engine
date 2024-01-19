@@ -22,22 +22,52 @@ int main()
 	glfwSetScrollCallback(glfwWindow, scroll_callback);
 	glfwSetCursorPosCallback(glfwWindow, mouse_callback);
 
-	// test file loading
-	Fusion::Shader testShader("res:/shaders/lighting.vert", "res:/shaders/lighting.frag");
-	Fusion::Texture testTexture("res:/images/container2.png", false, GL_TEXTURE0);
+	Fusion::Shader ourShader("res:/shaders/1.model_loading.vert", "res:/shaders/1.model_loading.frag");
+	Fusion::Model ourModel("res:/models/backpack/backpack.obj");
 
 	while (!glfwWindowShouldClose(glfwWindow))
 	{ 
 		// Process input
-		processInput();
+		processInput(); 
 
 		// Update Delta Time
 		float currentFrame = glfwGetTime();
 		Fusion::DeltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
+		// Rendering commands here
+		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+#if FS_DO_DEPTH_TEST
+		glEnable(GL_DEPTH_TEST);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+#endif
+#if FS_DRAW_WIRE_FRAME
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+#endif
+
+		ourShader.use();
+
+		// view/proj transformations
+		glm::mat4 proj = camera.GetProjMat4(window);
+		glm::mat4 view = camera.GetViewMat4();
+		ourShader.setMat4("projection", proj);
+		ourShader.setMat4("view", view);
+
+		// render loaded model
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+		ourShader.setMat4("model", model);
+		ourModel.Draw(ourShader);
+
+		// Check and call events and swap the buffers
+		glfwSwapBuffers(glfwWindow);
+		glfwPollEvents();
+
 		// Call NewFrame
-		window.NewFrame(); 
+		//window.NewFrame(); 
 	}
 
 	glfwTerminate();
