@@ -19,7 +19,7 @@ uniform Material material;
 
 void main()
 {
-    float ambientStrength = 0.45;
+    float ambientStrength = 0.25;
     vec3 ambient = ambientStrength * lightColor;
 
     vec3 Normal = texture(material.texture_normal1, TexCoords).rgb;

@@ -29,6 +29,7 @@ namespace Fusion
 			}
 
 			glfwMakeContextCurrent(m_window);
+			glfwSwapInterval(FS_VSYNC_ENABLED);
 
 			if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 			{

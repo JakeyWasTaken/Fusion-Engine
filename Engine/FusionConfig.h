@@ -21,6 +21,7 @@
 // Rendering definitions
 #define FS_DO_DEPTH_TEST 1
 #define FS_DRAW_WIRE_FRAME 0
+#define FS_VSYNC_ENABLED 0
 #define FS_DO_MULTISAMPLING 1
 #define FS_MULTISAMPLING_SAMPLES 4
 
