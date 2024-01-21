@@ -1,20 +1,41 @@
 #pragma once
 #include "FusionCore.h"
 
+unsigned int ActiveShaderProg;
+
 namespace Fusion
 {
 	class Shader
 	{
 	public:
+        Shader() {}
+
         Shader(const char* vertexShaderName, const char* fragShaderName)
         {
+            m_vertexShaderName = vertexShaderName;
+            m_fragShaderName = fragShaderName;
+
             ShaderFactory::CreateShader(vertexShaderName, m_vertShader, ShaderType::Vertex);
             ShaderFactory::CreateShader(fragShaderName, m_fragShader, ShaderType::Fragment);
             ShaderFactory::CreateShaderProg(m_ProgId, m_vertShader, m_fragShader);
         }
 
+        void reloadShader()
+        {
+            bool wasActive = ActiveShaderProg == m_ProgId;
+            glDeleteProgram(m_ProgId);
+
+            ShaderFactory::CreateShader(m_vertexShaderName, m_vertShader, ShaderType::Vertex);
+            ShaderFactory::CreateShader(m_fragShaderName, m_fragShader, ShaderType::Fragment);
+            ShaderFactory::CreateShaderProg(m_ProgId, m_vertShader, m_fragShader);
+
+            if (wasActive)
+                use();
+        }
+
         void use()
         {
+            ActiveShaderProg = m_ProgId;
             glUseProgram(m_ProgId);
         }
 
@@ -81,8 +102,10 @@ namespace Fusion
             glUniformMatrix4fv(glGetUniformLocation(m_ProgId, name.c_str()), 1, GL_FALSE, &mat[0][0]);
         }
 	private:
-		unsigned int m_ProgId;
-		unsigned int m_vertShader;
-		unsigned int m_fragShader;
+        const char* m_vertexShaderName;
+        const char* m_fragShaderName;
+		unsigned int m_ProgId = NULL;
+		unsigned int m_vertShader = NULL;
+		unsigned int m_fragShader = NULL;
 	};
 }

@@ -37,10 +37,6 @@ namespace Fusion
 				return;
 			}
 
-#if FS_LOCK_MOUSE_ON_FOCUS
-			glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-#endif
-
 			glViewport(0, 0, m_width, m_height);
 
 			int maxVertexAttributes;

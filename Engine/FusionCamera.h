@@ -3,7 +3,7 @@
 
 glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 
-static float clamp(float n, float lower, float upper)
+float clamp(float n, float lower, float upper)
 {
 	n = (n > lower) * n + !(n > lower) * lower;
 	return (n < upper) * n + !(n < upper) * upper;
@@ -14,13 +14,19 @@ namespace Fusion
 	class Camera
 	{
 	public:
-		Camera(glm::vec3 position)
+		Camera(glm::vec3 position, Window window)
 		{
 			m_position = position;
+#if FS_LOCK_MOUSE_ON_STARTUP
+			glfwSetInputMode(window.GetWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+#endif
 		}
 
 		void ProcessInput(Window window)
 		{
+			static bool CameraSwitch = false;
+			static bool MouseStateSwitch = false;
+
 			float scaledSpeed = m_speed * DeltaTime;
 			GLFWwindow* glfwWindow = window.GetWindow();
 
@@ -36,6 +42,27 @@ namespace Fusion
 				m_position += m_up * scaledSpeed;
 			if (glfwGetKey(glfwWindow, GLFW_KEY_Q) == GLFW_PRESS)
 				m_position += -m_up * scaledSpeed;
+			if (glfwGetKey(glfwWindow, GLFW_KEY_M) == GLFW_PRESS)
+				MouseStateSwitch = true;
+			if (glfwGetKey(glfwWindow, GLFW_KEY_C) == GLFW_PRESS)
+				CameraSwitch = true;
+
+			if (glfwGetKey(glfwWindow, GLFW_KEY_C) == GLFW_RELEASE && CameraSwitch == true)
+			{
+				CameraSwitch = false;
+				m_Perspective = !m_Perspective;
+			}
+
+			if (glfwGetKey(glfwWindow, GLFW_KEY_M) == GLFW_RELEASE && MouseStateSwitch == true)
+			{
+				m_LockedMouse = !m_LockedMouse;
+				MouseStateSwitch = false;
+
+				if (m_LockedMouse)
+					glfwSetInputMode(window.GetWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+				else
+					glfwSetInputMode(window.GetWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			}
 		}
 
 		void ProcessScroll(Window window, double yOffset)
@@ -44,7 +71,7 @@ namespace Fusion
 			{
 				m_speed += yOffset;
 				m_speed = clamp(m_speed, 1, 100);
-				printf("[CAMERA] New scroll speed: %f\n", m_speed);
+				printf("[CAMERA] New move speed: %f\n", m_speed);
 			}
 			else
 			{
@@ -56,6 +83,9 @@ namespace Fusion
 
 		void ProcessMouse(double deltaX, double deltaY)
 		{
+			if (!m_LockedMouse)
+				return;
+
 			m_yaw += deltaX;
 			m_pitch += deltaY;
 
@@ -78,15 +108,20 @@ namespace Fusion
 			return glm::lookAt(m_position, m_position + m_direction, m_up);
 		}
 
-		glm::mat4 GetProjMat4(Window window)
+		glm::mat4 GetCameraMat4(Window window)
 		{
-			return glm::perspective(glm::radians(GetFov()), (float)window.GetWidth() / (float)window.GetHeight(), FS_NEAR_PLANE, FS_FAR_PLANE);
+			if (m_Perspective)
+				return glm::perspective(glm::radians(GetFov()), (float)window.GetWidth() / (float)window.GetHeight(), FS_NEAR_PLANE, FS_FAR_PLANE);
+
+			return glm::ortho<float>(0.0f, window.GetWidth(), 0.0f, window.GetHeight(), 0.0f - FS_NEAR_PLANE, FS_FAR_PLANE);
 		}
 
 		float GetFov()
 		{
 			return m_FOV;
 		}
+
+		bool IsMouseLocked() const { return m_LockedMouse; }
 
 		glm::vec3 GetPosition()
 		{
@@ -103,6 +138,8 @@ namespace Fusion
 		float m_yaw = 0;
 		float m_pitch = 0;
 		float m_FOV = FS_FIELD_OF_VIEW;
+		bool m_LockedMouse = FS_LOCK_MOUSE_ON_STARTUP;
+		bool m_Perspective = FS_PERSPECTIVE_CAMERA;
 		glm::vec3 m_position = glm::vec3(0.0f, 0.0f, 3.0f);
 		glm::vec3 m_direction = glm::normalize(m_position - glm::vec3(0.0f, 0.0f, 0.0f));
 		glm::vec3 m_right = glm::normalize(glm::cross(up, m_direction));

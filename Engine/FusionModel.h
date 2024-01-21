@@ -1,5 +1,6 @@
 #pragma once
 #include "FusionCore.h"
+#include "FusionMaterial.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -12,26 +13,42 @@ namespace Fusion
 	class Model
 	{
 	public:
-		Model(const char* filePath)
+		float CreationTime = glfwGetTime();
+
+		Model() {}
+
+		Model(const char* filePath, const char* modelName, Shader shader)
 		{
+			m_shader = shader;
+			m_name = modelName;
 			loadModel(filePath);
 		}
 
-		void Draw(Shader& shader)
+		void Draw(glm::mat4 modelMatrix, bool drawWireframe, Camera camera)
 		{
+			m_shader.setMat4("model", modelMatrix); // Set the matrix in vert shader to our model matrix
+
 			for (unsigned int i = 0; i < meshes.size(); i++)
-				meshes[i].Draw(shader);
+				meshes[i].Draw(drawWireframe, camera);
 		}
+
+		void ReloadShader() { m_shader.reloadShader(); }
+
+		std::vector<Mesh> GetMeshes() const { return meshes; }
+
+		const char* GetName() const { return m_name; }
 	private:
 		std::vector<Mesh> meshes;
 		std::string directory;
+		const char* m_name;
+		Shader m_shader;
 
 		void loadModel(std::string filePath)
 		{
 			std::string FilePath = FileLoader::GetFullFilePath(filePath);
 
 			Assimp::Importer import;
-			const aiScene* scene = import.ReadFile(FilePath, aiProcess_Triangulate | aiProcess_FlipUVs);
+			const aiScene* scene = import.ReadFile(FilePath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
 			if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 			{
@@ -80,6 +97,11 @@ namespace Fusion
 				vector.z = mesh->mNormals[i].z;
 				vertex.Normal = vector;
 
+				vector.x = mesh->mTangents[i].x;
+				vector.y = mesh->mTangents[i].y;
+				vector.z = mesh->mTangents[i].z;
+				vertex.Tangent = vector;
+
 				if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
 				{
 					glm::vec2 vec;
@@ -92,6 +114,7 @@ namespace Fusion
 
 				vertices.push_back(vertex);
 			}
+			
 			// process indices
 			for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 			{
@@ -99,19 +122,28 @@ namespace Fusion
 				for (unsigned int j = 0; j < face.mNumIndices; j++)
 					indices.push_back(face.mIndices[j]);
 			}
+			
 			// process material
 			if (mesh->mMaterialIndex >= 0)
 			{
 				aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+				// diffuse
 				std::vector<MeshTexture> diffuseMaps = loadMaterialTextures(material,
 					aiTextureType_DIFFUSE, "texture_diffuse");
 				textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+				// specular
 				std::vector<MeshTexture> specularMaps = loadMaterialTextures(material,
 					aiTextureType_SPECULAR, "texture_specular");
 				textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+				// normal
+				std::vector<MeshTexture> normalMaps = loadMaterialTextures(material,
+					aiTextureType_HEIGHT, "texture_normal");
+				textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 			}
 
-			return Mesh(vertices, indices, textures);
+			Material meshMaterial(textures, m_shader);
+
+			return Mesh(vertices, indices, meshMaterial);
 		}
 
 		std::vector<MeshTexture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)

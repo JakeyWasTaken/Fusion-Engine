@@ -7,6 +7,7 @@ namespace Fusion
 	{
 		glm::vec3 Position;
 		glm::vec3 Normal;
+		glm::vec3 Tangent;
 		glm::vec2 TexCoords;
 	};
 
@@ -15,6 +16,12 @@ namespace Fusion
 		std::string type;
 		std::string path;
 	};
+}
+
+#include "FusionMaterial.h"
+
+namespace Fusion
+{
 
 	class Mesh
 	{
@@ -22,39 +29,24 @@ namespace Fusion
 		// Mesh Data
 		std::vector<MeshVertex> vertices;
 		std::vector<unsigned int> indices;
-		std::vector<MeshTexture> textures;
+		Material material;
 
-		Mesh(std::vector<MeshVertex> vertices, std::vector<unsigned int> indices, std::vector<MeshTexture> textures)
+		Mesh(std::vector<MeshVertex> vertices, std::vector<unsigned int> indices, Material material)
 		{
 			this->vertices = vertices;
 			this->indices = indices;
-			this->textures = textures;
+			this->material = material;
 
 			setupMesh();
 		}
-		void Draw(Shader& shader)
-		{
-			unsigned int diffuseNr = 1;
-			unsigned int specularNr = 1;
-			for (unsigned int i = 0; i < textures.size(); i++)
-			{
-				glActiveTexture(GL_TEXTURE0 + i); // activate proper texture unit before binding
-				// retrieve texture number (the N in diffuse_textureN)
-				std::string number;
-				std::string name = textures[i].type;
-				if (name == "texture_diffuse")
-					number = std::to_string(diffuseNr++);
-				else if (name == "texture_specular")
-					number = std::to_string(specularNr++);
 
-				shader.setInt(("material." + name + number).c_str(), i);
-				shader.setVec3("lightPosition", LightPosition);
-				shader.setVec3("lightColor", LightColor);
-				glBindTexture(GL_TEXTURE_2D, textures[i].id);
-			}
-			glActiveTexture(GL_TEXTURE0);
+		void Draw(bool drawWireframe, Camera camera)
+		{
+			material.PreDraw(camera);
 
 			// draw mesh
+			glPolygonMode(GL_FRONT_AND_BACK, drawWireframe ? GL_LINE : GL_FILL);
+
 			glBindVertexArray(m_VAO);
 			glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 			glBindVertexArray(0);
