@@ -6,9 +6,9 @@
 
 namespace Fusion
 {
-	unsigned int TextureFromFile(const char* path, bool gamma)
+	unsigned int TextureFromFile(const char* p_path, bool gamma)
 	{
-		std::string fp = FileLoader::GetFullFilePath(path);
+		std::string fp = FileLoader::GetFullFilePath(p_path);
 
 		unsigned int textureID;
 		glGenTextures(1, &textureID);
@@ -39,7 +39,7 @@ namespace Fusion
 		}
 		else
 		{
-			printf("[TEXTURE][ERROR] Texture failed to load at path: (%s)", path);
+			printf("[TEXTURE][ERROR] Texture failed to load at path: (%s)", p_path);
 			stbi_image_free(data);
 		}
 

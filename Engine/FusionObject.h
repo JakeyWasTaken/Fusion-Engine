@@ -11,25 +11,17 @@ namespace Fusion
 		glm::vec3 scale = glm::vec3(1.0f);
 		bool drawWireframe = FS_DRAW_WIRE_FRAME;
 
-		Object(Model model, const char* objectName)
+		Object(Model* p_model, const char* objectName)
 		{
-			m_model = model;
+			m_model = p_model;
 			m_name = objectName;
 		}
 
-		Object(Model model, const char* objectName, glm::vec3 modelPosition, glm::vec3 modelScale)
-		{
-			m_model = model;
-			m_name = objectName;
-			position = modelPosition;
-			scale = modelScale;
-		}
+		Model* GetModel() const { return m_model; }
 
-		Model GetModel() const { return m_model; }
-
-		void SetModel(Model model)
+		void SetModel(Model* p_model)
 		{
-			m_model = model;
+			m_model = p_model;
 		}
 
 		void Draw(Camera camera)
@@ -39,26 +31,17 @@ namespace Fusion
 			model *= glm::eulerAngleXYZ(rotation.x, rotation.y, rotation.z);
 			model = glm::scale(model, scale);
 
-			m_model.Draw(model, drawWireframe, camera);
+			m_model->Draw(model, drawWireframe, camera);
 		}
 
 		void GetObjectTopologyStats(uint32_t& vertices, uint32_t& triangles, uint32_t& meshes)
 		{
-			std::vector<Mesh> modelMeshes = m_model.GetMeshes();
-
-			meshes = (uint32_t)modelMeshes.size();
-
-			for (uint32_t i = 0; i < modelMeshes.size(); i++)
-			{
-				Mesh mesh = modelMeshes[i];
-				vertices += mesh.vertices.size();
-				triangles += (uint32_t)glm::floor(mesh.indices.size() / 3);
-			}
+			m_model->GetObjectTopologyStats(vertices, triangles, meshes);
 		}
 
 		const char* GetName() const { return m_name; }
 	private:
-		Model m_model;
+		Model* m_model;
 		const char* m_name;
 	};
 }

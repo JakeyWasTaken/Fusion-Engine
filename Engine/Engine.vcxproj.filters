@@ -28,6 +28,12 @@
     <Filter Include="Header Files\Debug">
       <UniqueIdentifier>{dc7bb21d-9915-40f3-b9e8-bcd9060b8f84}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Scene">
+      <UniqueIdentifier>{483fcea1-c040-4b7f-ab76-786bd959c101}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\tinyxml2">
+      <UniqueIdentifier>{0cb2f44b-d67a-4369-b972-618cb6c3b1a4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FusionCore.cpp">
@@ -56,6 +62,9 @@
     </ClCompile>
     <ClCompile Include="imgui\imgui_widgets.cpp">
       <Filter>Resource Files\DearImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="tinyxml2.cpp">
+      <Filter>Resource Files\tinyxml2</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -126,7 +135,13 @@
       <Filter>Header Files\Object</Filter>
     </ClInclude>
     <ClInclude Include="FusionScene.h">
-      <Filter>Header Files\Rendering</Filter>
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="FusionSceneSerialization.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="tinyxml2.h">
+      <Filter>Resource Files\tinyxml2</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

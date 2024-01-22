@@ -7,13 +7,15 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 void processInput();
 
 Fusion::Window window;
-Fusion::Camera camera(glm::vec3(0.0f), window);
+Fusion::Camera camera(glm::vec3(0.0f, 5.0f, 0.0f), window);
 Fusion::Scene scene;
 
 float lastMouseX;
 float lastMouseY;
 
 float lastFrame = glfwGetTime();
+
+using namespace Fusion;
 
 int main()
 {
@@ -38,22 +40,27 @@ int main()
 	glfwSetMouseButtonCallback(glfwWindow, mouse_button_callback);
 	glfwSetCursorPosCallback(glfwWindow, mouse_callback);
 
-	Fusion::Shader ourShader("res:/shaders/basic.vert", "res:/shaders/basic.frag");
-	Fusion::Model ourMeshModel("res:/models/backpack/backpack.obj", "backpack", ourShader);
-	Fusion::Object object1(ourMeshModel, "Object1");
-	Fusion::Object object2(ourMeshModel, "Object2");
+	Shader* ourShader = new Shader("res:/shaders/basic.vert", "res:/shaders/basic.frag");
+	Model* ourMeshModel = new Model("res:/models/backpack/backpack.obj", "backpack", ourShader);
+	Object* object1 = new Object(ourMeshModel, "Object1");
+	Object* object2 = new Object(ourMeshModel, "Object2");
 
-	scene.PushObject(&object1);
-	scene.PushObject(&object2);
+	scene.PushObject(object1);
+	scene.PushObject(object2);
 	
-	object1.position = glm::vec3(0, 5, 0);
-	object1.scale = glm::vec3(0.5f);
+	object1->position = glm::vec3(0, 5, 0);
+	object1->scale = glm::vec3(0.5f);
 
-	object2.position = glm::vec3(5, 5, 0);
-	object2.scale = glm::vec3(1.5f);
+	object2->position = glm::vec3(5, 5, 0);
+	object2->scale = glm::vec3(1.5f);
+
+	Fusion::SceneReady = true;
 
 	while (!glfwWindowShouldClose(glfwWindow))
 	{ 
+		if (!Fusion::SceneReady)
+			continue;
+
 		glfwPollEvents();
 
 		// ImGui
@@ -64,16 +71,16 @@ int main()
 		ImGui::ShowDemoWindow(); // Show demo window! :)
 #endif
 
-		Fusion::Debug::DrawImGui(scene);
+		Debug::DrawImGui(&scene);
 
-		object2.rotation = glm::vec3(0.0f, glm::radians(sin(glfwGetTime()) * 15.0f), 0.0f);
+		//object2->rotation = glm::vec3(0.0f, glm::radians(sin(glfwGetTime()) * 15.0f), 0.0f);
 
 		// Process input
 		processInput(); 
 
 		// Update Delta Time
 		float currentFrame = glfwGetTime();
-		Fusion::DeltaTime = currentFrame - lastFrame;
+		DeltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
 		// Rendering commands here
@@ -85,13 +92,12 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 #endif
 
-		ourShader.use();
-
 		// view/proj transformations
 		glm::mat4 proj = camera.GetCameraMat4(window);
 		glm::mat4 view = camera.GetViewMat4();
-		ourShader.setMat4("projection", proj);
-		ourShader.setMat4("view", view);
+
+		Fusion::CameraProj = proj;
+		Fusion::CameraView = view;
 
 		// render scene
 		scene.Draw(camera);

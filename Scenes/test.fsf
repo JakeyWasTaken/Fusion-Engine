@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Scene version="1">
+    <Object>
+        <name>Object1</name>
+        <position>0.000000,5.000000,0.000000</position>
+        <scale>0.500000,1.000000,0.500000</scale>
+        <rotation>0.000000,0.000000,0.000000</rotation>
+        <model>1</model>
+    </Object>
+    <Object>
+        <name>Object2</name>
+        <position>5.000000,5.000000,0.000000</position>
+        <scale>1.500000,1.500000,1.500000</scale>
+        <rotation>0.000000,0.000000,0.000000</rotation>
+        <model>1</model>
+    </Object>
+    <Model>
+        <name>backpack</name>
+        <file>res:/models/backpack/backpack.obj</file>
+        <shader>7</shader>
+        <id>1</id>
+    </Model>
+    <Shader>
+        <id>7</id>
+        <vert>res:/shaders/basic.vert</vert>
+        <frag>res:/shaders/basic.frag</frag>
+    </Shader>
+</Scene>

@@ -13,35 +13,58 @@ namespace Fusion
 	class Model
 	{
 	public:
-		float CreationTime = glfwGetTime();
+		unsigned int Id = Fusion::GetModelIndex();
 
 		Model() {}
 
-		Model(const char* filePath, const char* modelName, Shader shader)
+		Model(const char* filePath, const char* modelName, Shader* p_shader)
 		{
-			m_shader = shader;
+			m_shader = p_shader;
 			m_name = modelName;
+			m_path = filePath;
 			loadModel(filePath);
+		}
+
+		~Model()
+		{
+
 		}
 
 		void Draw(glm::mat4 modelMatrix, bool drawWireframe, Camera camera)
 		{
-			m_shader.setMat4("model", modelMatrix); // Set the matrix in vert shader to our model matrix
+			m_shader->setMat4("model", modelMatrix); // Set the matrix in vert shader to our model matrix
 
 			for (unsigned int i = 0; i < meshes.size(); i++)
 				meshes[i].Draw(drawWireframe, camera);
 		}
 
-		void ReloadShader() { m_shader.reloadShader(); }
+		void ReloadShader() { m_shader->reloadShader(); }
+
+		void GetObjectTopologyStats(uint32_t& vertices, uint32_t& triangles, uint32_t& meshes)
+		{
+			std::vector<Mesh> modelMeshes = GetMeshes();
+
+			meshes = (uint32_t)modelMeshes.size();
+
+			for (uint32_t i = 0; i < modelMeshes.size(); i++)
+			{
+				Mesh mesh = modelMeshes[i];
+				vertices += mesh.vertices.size();
+				triangles += (uint32_t)glm::floor(mesh.indices.size() / 3);
+			}
+		}
 
 		std::vector<Mesh> GetMeshes() const { return meshes; }
 
+		const char* GetPath() const { return m_path; }
 		const char* GetName() const { return m_name; }
+		Shader* GetShader() const { return m_shader; }
 	private:
 		std::vector<Mesh> meshes;
 		std::string directory;
 		const char* m_name;
-		Shader m_shader;
+		const char* m_path;
+		Shader* m_shader;
 
 		void loadModel(std::string filePath)
 		{

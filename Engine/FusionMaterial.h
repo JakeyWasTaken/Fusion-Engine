@@ -13,10 +13,10 @@ namespace Fusion
 	public:
 		Material() {}
 
-		Material(std::vector<MeshTexture> textures, Shader shader)
+		Material(std::vector<MeshTexture> textures, Shader* p_shader)
 		{
 			m_textures.insert(m_textures.end(), textures.begin(), textures.end());
-			m_shader = shader;
+			m_shader = p_shader;
 		}
 
 		void PreDraw(Camera camera)
@@ -39,20 +39,23 @@ namespace Fusion
 				else if (name == "texture_normal")
 					number = std::to_string(normalIndex++);
 
-				m_shader.setInt("material." + name + number, i);
+				m_shader->setInt("material." + name + number, i);
 				glBindTexture(GL_TEXTURE_2D, m_textures[i].id);
 			}
 			glActiveTexture(GL_TEXTURE0);
 
-			m_shader.setVec3("lightPosition", LightPosition);
-			m_shader.setVec3("cameraPosition", camera.GetPosition());
-			m_shader.setVec3("lightColor", LightColor);
+			m_shader->setVec3("lightPosition", LightPosition);
+			m_shader->setVec3("cameraPosition", camera.GetPosition());
+			m_shader->setVec3("lightColor", LightColor);
 
-			m_shader.use();
+			m_shader->setMat4("projection", Fusion::CameraProj);
+			m_shader->setMat4("view", Fusion::CameraView);
+
+			m_shader->use();
 		}
 
 	private:
 		std::vector<MeshTexture> m_textures;
-		Shader m_shader;
+		Shader* m_shader;
 	};
 }

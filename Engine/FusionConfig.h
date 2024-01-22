@@ -10,10 +10,17 @@
 #define FS_APPLICATION_WIDTH 800
 #define FS_APPLICATION_HEIGHT 600
 #define FS_LOCK_MOUSE_ON_STARTUP 0
+#if _DEBUG
+#define FS_BUILD_TYPE "Debug"
+#else
+#define FS_BUILD_TYPE "Release"
+#endif
 #define FS_MAX_CHAR_SIZE 512
 
 // File definitions
 #define FS_RESOURCE_LOCATION "../Engine/res"
+#define FS_FSF_VERSION 1
+#define FS_SUPPORTED_FSF_VERSION 1
 
 // Debug definitions
 #define FS_SHOW_IMGUI_DEMO 0

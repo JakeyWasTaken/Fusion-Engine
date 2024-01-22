@@ -12,6 +12,7 @@ namespace Fusion
 
         Shader(const char* vertexShaderName, const char* fragShaderName)
         {
+            // Allows us to reload shaders
             m_vertexShaderName = vertexShaderName;
             m_fragShaderName = fragShaderName;
 
@@ -20,17 +21,33 @@ namespace Fusion
             ShaderFactory::CreateShaderProg(m_ProgId, m_vertShader, m_fragShader);
         }
 
+        ~Shader()
+        {
+            glDeleteProgram(m_ProgId);
+        }
+
         void reloadShader()
         {
             bool wasActive = ActiveShaderProg == m_ProgId;
-            glDeleteProgram(m_ProgId);
+
+            unsigned int tempProgId;
 
             ShaderFactory::CreateShader(m_vertexShaderName, m_vertShader, ShaderType::Vertex);
             ShaderFactory::CreateShader(m_fragShaderName, m_fragShader, ShaderType::Fragment);
-            ShaderFactory::CreateShaderProg(m_ProgId, m_vertShader, m_fragShader);
+            bool Success = ShaderFactory::CreateShaderProg(tempProgId, m_vertShader, m_fragShader);
 
-            if (wasActive)
-                use();
+            if (Success)
+            {
+                glDeleteProgram(m_ProgId);
+                m_ProgId = tempProgId;
+                if (wasActive)
+                    use();
+            }
+            else
+            {
+                printf("Failed to reload shaders");
+            }
+            
         }
 
         void use()
@@ -43,6 +60,9 @@ namespace Fusion
         {
             return m_ProgId;
         }
+
+        const char* getVertPath() const { return m_vertexShaderName; }
+        const char* getFragPath() const { return m_fragShaderName; }
 
         void setBool(const std::string& name, bool value) const
         {
@@ -102,8 +122,8 @@ namespace Fusion
             glUniformMatrix4fv(glGetUniformLocation(m_ProgId, name.c_str()), 1, GL_FALSE, &mat[0][0]);
         }
 	private:
-        const char* m_vertexShaderName;
-        const char* m_fragShaderName;
+        const char* m_vertexShaderName = nullptr;
+        const char* m_fragShaderName = nullptr;
 		unsigned int m_ProgId = NULL;
 		unsigned int m_vertShader = NULL;
 		unsigned int m_fragShader = NULL;

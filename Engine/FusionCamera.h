@@ -20,6 +20,12 @@ namespace Fusion
 #if FS_LOCK_MOUSE_ON_STARTUP
 			glfwSetInputMode(window.GetWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 #endif
+
+			// Update camera vectors on startup so we dont have to move mouse to get visuals
+			m_LockedMouse = true;
+			ProcessMouse(0, 0);
+			m_LockedMouse = false;
+			GetViewMat4();
 		}
 
 		void ProcessInput(Window window)
@@ -111,9 +117,17 @@ namespace Fusion
 		glm::mat4 GetCameraMat4(Window window)
 		{
 			if (m_Perspective)
-				return glm::perspective(glm::radians(GetFov()), (float)window.GetWidth() / (float)window.GetHeight(), FS_NEAR_PLANE, FS_FAR_PLANE);
+			{
+				float aspect = (float)window.GetWidth() / (float)window.GetHeight();
 
-			return glm::ortho<float>(0.0f, window.GetWidth(), 0.0f, window.GetHeight(), 0.0f - FS_NEAR_PLANE, FS_FAR_PLANE);
+				if (aspect != aspect) // prevent assertion when minimized (checks if NaN)
+				{
+					return glm::mat4(1.0f);
+				}
+
+				return glm::perspective(glm::radians(GetFov()), aspect, FS_NEAR_PLANE, FS_FAR_PLANE);
+			}
+			//return glm::ortho<float>(0.0f, window.GetWidth(), 0.0f, window.GetHeight(), 0.0f - FS_NEAR_PLANE, FS_FAR_PLANE);
 		}
 
 		float GetFov()

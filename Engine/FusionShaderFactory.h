@@ -49,7 +49,7 @@ namespace Fusion
 			}
 		}
 
-		void CreateShaderProg(unsigned int& shaderProgram, unsigned int vertexShader, unsigned int fragmentShader)
+		bool CreateShaderProg(unsigned int& shaderProgram, unsigned int vertexShader, unsigned int fragmentShader)
 		{
 			shaderProgram = glCreateProgram();
 
@@ -64,10 +64,12 @@ namespace Fusion
 			if (!success) {
 				glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
 				printf("[SHADER FACTORY][ERROR] Failed to create shader program\n%s\n", infoLog);
+				return false;
 			}
 			else
 			{
 				printf("[SHADER FACTORY] Created shader program\n");
+				return true;
 			}
 
 			glDeleteShader(vertexShader);
